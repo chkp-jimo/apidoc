@@ -1,0 +1,1537 @@
+{
+  "openapi": "3.0.2",
+  "info": {
+    "title": "Check Point Harmony Connect API",
+    "description": "Versions: [v1](https://app.swaggerhub.com/apis-docs/Check-Point/cloudguard-connect-api/1.0.0/) | [v1.1](https://app.swaggerhub.com/apis-docs/Check-Point/cloudguard-connect-api/1.1.0/) | [v1.2](https://app.swaggerhub.com/apis-docs/Check-Point/cloudguard-connect-api/1.2.0/) | [v1.3](https://app.swaggerhub.com/apis-docs/Check-Point/harmony-connect-api/1.3.0/) | [v1.4](https://app.swaggerhub.com/apis-docs/Check-Point/harmony-connect-api/1.4.0/) | v2\n# Introduction\nCheck Point's Harmony Connect is a cloud security platform that provides Check Point's latest Threat Prevention and Access Control for branch offices.\n\nCustomers can connect their existing routing equipment or SD-WAN device to Harmony Connect without additional dedicated hardware by Check Point.\n\nHarmony Connect is a full software-as-a-service solution, eliminating the need for maintenance by the customer.\n\nCheck Point's security product line includes: Preventing known attacks using reputation services, signatures and bot communication prevention,  preventing unknown attacks using cloud-based sandboxing, an Access Control policy including Content Awareness,\nHTTPS Inspection and Application Control, and a web-based management for security events and log monitoring, policy and site configuration.\n\nThis API describes management of Sites at Harmony Connect. A Site represents a branch office.\n\n**Important:** Before making any API call, please refer to the **Authentication** section.\n\nFor Application Access (previously \"Odo\") API, [click here](https://app.swaggerhub.com/apis-docs/Check-Point/Odo-API)\n\nRead More:\n* [Harmony Connect product page](https://www.checkpoint.com/products/branch-cloud-security/)\n* [See Check Point's additional API packages](https://sc1.checkpoint.com/documents/latest/api_reference/index.html)\n* [Discuss on CheckMates](https://community.checkpoint.com/t5/SD-WAN/bd-p/sdwan)\n\nDownloads:\n* [Postman Collection](http://sc1.checkpoint.com/documents/HarmonyConnect/HarmonyConnect-API-v2.0-postman.json)",
+    "version": "2.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://cloudinfra-gw.portal.checkpoint.com/app/harmonyconnect/v2",
+      "description": "Check Point Infinity Portal - Harmony Connect endpoint (Default)"
+    },
+    {
+      "url": "https://cloudinfra-gw-us.portal.checkpoint.com/app/harmonyconnect/v2",
+      "description": "Check Point Infinity Portal - Harmony Connect endpoint - USA"
+    }
+  ],
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "paths": {
+    "/auth/external": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Authenticate using an API Key",
+        "description": "Before making any API call, the user needs to authenticate using an API Key.\n\nAn API Key consists of Client ID and Secret Key.\n\nUsers can create API Keys by browsing to Infinity Portal at **GLOBAL SETTINGS > API Keys**.\n\nWhen creating an API Key, make sure that **module** is set to **Harmony Connect**.\n\n[Read about API Keys at Infinity Portal Admin Guide](https://sc1.checkpoint.com/documents/Infinity_Portal/WebAdminGuides/EN/Infinity-Portal-Admin-Guide/Content/Topics-Infinity-Portal-Admin-Guide/Global-Settings.htm?Highlight=api).\n\nA successful authentication results with a temporary authentication token.\n\nThis token will expire 30 minutes from its generation time, for security purposes. Therefore, for web applications it is recommended to re-authenticate prior to getting this temporary authentication token expired.\n\nExample of authenticating with an API Key's Client ID and Secret Key (default URL):\n\n    >curl -d '{\"clientId\":\"$CLIENT_ID\",\"accessKey\":\"$SECRET_KEY\"}' -H \"Content-Type: application/json\" -X POST https://cloudinfra-gw.portal.checkpoint.com/auth/external\n\nExample of authenticating with an API Key's Client ID and Secret Key (For USA Tenants):\n\n    >curl -d '{\"clientId\":\"$CLIENT_ID\",\"accessKey\":\"$SECRET_KEY\"}' -H \"Content-Type: application/json\" -X POST https://cloudinfra-gw-us.portal.checkpoint.com/auth/external\n\nThe temporary authentication token retrieved at the response of this call, should be then used as  **Authorization: Bearer [token]** header at each request.\n\nExample of adding the authorization bearer token \"abc\" to an API call (default URL):\n\n\n    >curl -H \"Authorization: Bearer abc\" https://cloudinfra-gw.portal.checkpoint.com/app/harmonyconnect/latest/locations\n\nExample of adding the authorization bearer token \"abc\" to an API call (For USA Tenants):\n\n\n    >curl -H \"Authorization: Bearer abc\" https://cloudinfra-gw-us.portal.checkpoint.com/app/harmonyconnect/latest/locations",
+        "operationId": "getAuthToken",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/GetAuthToken"
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/inline_response_200"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Access token is missing or invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [],
+        "servers": [
+          {
+            "url": "https://cloudinfra-gw.portal.checkpoint.com",
+            "description": "Check Point Infinity Portal - Root endpoint"
+          }
+        ]
+      }
+    },
+    "/sites": {
+      "get": {
+        "tags": [
+          "Sites"
+        ],
+        "summary": "Get all sites",
+        "description": "Get the list of sites defined at Harmony Connect.\n\nA site represents a branch office.",
+        "operationId": "getSites",
+        "parameters": [
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "objects from offset (must be used with 'limit' parameter)",
+            "required": false,
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "maximum": 1000000,
+              "minimum": 0,
+              "type": "integer",
+              "default": 0
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "objects to (must be used with 'offset' parameter)",
+            "required": false,
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "maximum": 100,
+              "minimum": 0,
+              "type": "integer",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/inline_response_200_1"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Access token is missing or invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Sites"
+        ],
+        "summary": "Create a site",
+        "description": "Add new site to Harmony Connect.\n\nA site represents a branch office.\n\n<h3>Location of the cloud service for this site</h3>\n\nA site's location represents the location of Check Point's cloud service that this site will connect to, to provide secure Internet access.\nSee `/locations` to get a list of locations. In case locationId is not provided, Check Point will use the site's physical location and select the most fitting location of the cloud service automatically.\n\nYou can set the site's physical location using the *latitude and longitude* (numbers) parameters or using the *address* (string) parameter.\n\nTherefore, either *locationId* or *latitude and longitude* or *address* must be provided.",
+        "operationId": "addSite",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/AddSite"
+        },
+        "responses": {
+          "201": {
+            "description": "Site added successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/inline_response_201"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Access token is missing or invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sites/{siteId}": {
+      "get": {
+        "tags": [
+          "Sites"
+        ],
+        "summary": "Get a site by its ID",
+        "description": "Get a site defined at Harmony Connect with a specific ID.\n\nA site represents a branch office.",
+        "operationId": "getSiteById",
+        "parameters": [
+          {
+            "name": "siteId",
+            "in": "path",
+            "description": "ID of a site. For the list of all sites and their ID's, see the API for /sites",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "$ref": "#/components/schemas/ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/inline_response_201"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Access token is missing or invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorsResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Sites"
+        ],
+        "summary": "Delete a site",
+        "description": "Delete a site by its ID.\n\nA site represents a branch office.",
+        "operationId": "deleteSite",
+        "parameters": [
+          {
+            "name": "siteId",
+            "in": "path",
+            "description": "ID of a site. For the list of all sites and their ID's, see the API for /sites",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "$ref": "#/components/schemas/ID"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful operation"
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Access token is missing or invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorsResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Sites"
+        ],
+        "summary": "Update a site",
+        "description": "\nUpdates a site based on its ID.\n\n<h3>Location of the cloud service for this site</h3>\n\nA site's location represents the location of Check Point's cloud service that this site will connect to, to provide secure Internet access.\nSee `/locations` to get a list of locations. In case locationId is not provided, Check Point will use the site's physical location and select the most fitting location of the cloud service automatically.\n\nYou can set the site's physical location using the *latitude and longitude* (numbers) parameters or using the *address* (string) parameter.\n\nTherefore, either *locationId* or *latitude and longitude* or *address* must be provided.\n\n The following parameters cannot be edited: Location, tunnel type, name. In case you would like to modify those parameters, you would need to delete and re-create the site.",
+        "operationId": "updateSite",
+        "parameters": [
+          {
+            "name": "siteId",
+            "in": "path",
+            "description": "ID of a site. For the list of all sites and their ID's, see the API for /sites",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "$ref": "#/components/schemas/ID"
+            }
+          }
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/UpdateSite"
+        },
+        "responses": {
+          "200": {
+            "description": "Site updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/inline_response_201"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Access token is missing or invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Operation is forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorsResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorsResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/locations": {
+      "get": {
+        "tags": [
+          "Locations (Locations of the cloud service)"
+        ],
+        "summary": "Get all available locations of the cloud service",
+        "operationId": "getLocations",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/inline_response_200_2"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Access token is missing or invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/locations/{locationId}": {
+      "get": {
+        "tags": [
+          "Locations (Locations of the cloud service)"
+        ],
+        "summary": "Get a location of the cloud service by its ID",
+        "operationId": "getLocationById",
+        "parameters": [
+          {
+            "name": "locationId",
+            "in": "path",
+            "description": "ID of a location of Check Point's cloud service as pre-defined by Check Point.",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "$ref": "#/components/schemas/ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/inline_response_200_3"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Access token is missing or invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorsResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "GetAuthTokenInput": {
+        "required": [
+          "accessKey",
+          "clientId"
+        ],
+        "type": "object",
+        "properties": {
+          "clientId": {
+            "type": "string",
+            "description": "Client ID, retrieved from Check Point Infinity portal (Global settings -> API Keys)",
+            "example": "891f02eb7b2947a2b4b2d77c6cffc054"
+          },
+          "accessKey": {
+            "type": "string",
+            "description": "Secret Key, retrieved from Check Point Infinity portal (Global settings -> API Keys)",
+            "example": "8edfba157728495c9e21fba1b214169a"
+          }
+        }
+      },
+      "AuthToken": {
+        "type": "string",
+        "description": "Authentication token to be used in \"Authorization\" request headers for other operations",
+        "example": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0ZW5hbnRJZCI6ImEwOGJiZWY3LTE4NDAtNDFlZC05ZWQzLWUyZDZlNGUyMGUxMyIsImNzcmYiOiI2MmJkOGM1OC02NmY5LTQ2YzktYjk3Mi00ZmQzMjhlMjY3NTQiLCJzZXNzaW9uSWQiOiJkOTI4ZDA2NS1mZDRiLTRlNGYtYTU1My00M2JlZjM0MDQ3MmIiLCJjbGllbnRJZCI6IjIwMGJhMTdmLWIzYTItNGM3MC1iOThjLTEzMzI4MDZkNDFhNCIsImRlc2NyaXB0aW9uIjoiQVBJIHRlc3QiLCJhcHBJZCI6IjEyMzQ1Njc4LTY2NjYtMTIzNC0xMjM0LTEyMzQ1Njc4OTEyMyIsInJvbGUiOiJBZG1pbiIsInNjb3BlIjpudWxsLCJpc3N1ZWRCeSI6InRvbWVyc29AY2hlY2twb2ludC5jb20iLCJjb29raWVWZXJzaW9uIjo0LCJpYXQiOjE1NjUxMDk1NTMsImV4cCI6MTU2NTExMTM1M30.K_aZkhIxHdHIHwsqbMCYt31yzpeynbSqPWBk5UC0v0QvG7cxSDN5BcxO0XisKp31mFINCBk8mOcrgRPABtic70iQQ9bVjW1HLPBeLvHRD0rZUUCR7D70LbT-9bgDYyvnAAo6oCBzAAoVNra0S7Vqpx7AW9ET190XRDHHbsZgpmZlZQpn0MOtn7k8GTDJcXa7WYzEtSfOFuqx8TSdvxC6ihy4AWd_zSucydQ-Y3JWLqJt6E2OwK1lZMbtPwpcgFrVtewwcRymoNmSCz9JktbD8yQi6vD241a6_BsTxKDuIW-6R9_g0SJBpVCaDfCYhtYt6x3_2v0ZDdTqG50HLfB6ObwN4iEFVkNZHa8rCEQTBrUmgfDczKhxxa5elzxuxO2a4jNBEUF4zAmvRZSwFT5YaZHqCpKUUWlY2QD8V-gDnKJiwtR_HydGwYdfSMKZkYO0fVEG_HeqxiuIXV3od53ndH_evvK_TbxcxJkR5c2e-LcuZf6BLrxacHkWneTOT3XNsjgGLaj4if5sQu3v7e3_b-vfk3tH_1Z0CR9a4HwleDpWnX6FJwCVyk8U1g29r7svdv94t_N-WnomHOTa7ZHP4xX5NersEUouVLvVXVdoB5AUojvJUdrYjSWd6fy4MEer_JWIosDU4-SwkuRMXfXyYry1-aOMvBKmtIQrDAEDkmU"
+      },
+      "Site": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/ID"
+          },
+          "name": {
+            "$ref": "#/components/schemas/SiteName"
+          },
+          "description": {
+            "$ref": "#/components/schemas/SiteDescription"
+          },
+          "type": {
+            "$ref": "#/components/schemas/SiteType"
+          },
+          "state": {
+            "$ref": "#/components/schemas/SiteState"
+          },
+          "location": {
+            "$ref": "#/components/schemas/Location"
+          },
+          "address": {
+            "$ref": "#/components/schemas/Address"
+          },
+          "latitude": {
+            "$ref": "#/components/schemas/Latitude"
+          },
+          "longitude": {
+            "$ref": "#/components/schemas/Longitude"
+          },
+          "deviceType": {
+            "$ref": "#/components/schemas/DeviceType"
+          },
+          "subnets": {
+            "$ref": "#/components/schemas/Subnets"
+          },
+          "tunnelConnection": {
+            "type": "object",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/IPSecConnection"
+              },
+              {
+                "$ref": "#/components/schemas/GREConnection"
+              }
+            ]
+          },
+          "tunnelType": {
+            "$ref": "#/components/schemas/TunnelType"
+          },
+          "tunnelParameters": {
+            "type": "object",
+            "nullable": true,
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/GRETunnelParameters"
+              },
+              {
+                "$ref": "#/components/schemas/IPSecTunnelParameters"
+              }
+            ]
+          }
+        }
+      },
+      "Location": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/ID"
+          },
+          "name": {
+            "$ref": "#/components/schemas/LocationName"
+          }
+        },
+        "example": {
+          "id": "22222222-2222-2222-222222222222",
+          "name": "US: South East"
+        }
+      },
+      "AddSiteInput": {
+        "required": [
+          "name",
+          "subnets",
+          "tunnelType"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "$ref": "#/components/schemas/SiteName"
+          },
+          "description": {
+            "$ref": "#/components/schemas/SiteDescription"
+          },
+          "locationId": {
+            "$ref": "#/components/schemas/ID"
+          },
+          "address": {
+            "$ref": "#/components/schemas/Address"
+          },
+          "latitude": {
+            "$ref": "#/components/schemas/Latitude"
+          },
+          "longitude": {
+            "$ref": "#/components/schemas/Longitude"
+          },
+          "deviceType": {
+            "$ref": "#/components/schemas/DeviceType"
+          },
+          "subnets": {
+            "$ref": "#/components/schemas/Subnets"
+          },
+          "greConnection": {
+            "$ref": "#/components/schemas/AddGREConnection"
+          },
+          "ipsecConnection": {
+            "$ref": "#/components/schemas/AddIPSecConnection"
+          },
+          "tunnelType": {
+            "$ref": "#/components/schemas/TunnelType"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AddIPSecConnection": {
+        "required": [
+          "isDynamicIp"
+        ],
+        "type": "object",
+        "properties": {
+          "isDynamicIp": {
+            "type": "boolean",
+            "description": "Set to `true` for using dynamic IP address, `false` for using static IP address."
+          },
+          "isMonitorWithDpd": {
+            "type": "boolean",
+            "description": "Set to `true` for tunnel monitoring using dpd (dead peer detection), `false` for monitoring by traffic."
+          },
+          "staticIpConnection": {
+            "$ref": "#/components/schemas/AddStaticIpConnection"
+          },
+          "dynamicIpConnection": {
+            "$ref": "#/components/schemas/AddDynamicIpConnection"
+          }
+        }
+      },
+      "AddStaticIpConnection": {
+        "required": [
+          "externalIps",
+          "preSharedKey"
+        ],
+        "type": "object",
+        "properties": {
+          "externalIps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IPv4Address"
+            }
+          },
+          "preSharedKey": {
+            "$ref": "#/components/schemas/PreSharedKey"
+          }
+        }
+      },
+      "AddDynamicIpConnection": {
+        "required": [
+          "interfaceIdentifiers",
+          "preSharedKey"
+        ],
+        "type": "object",
+        "properties": {
+          "interfaceIdentifiers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FQDN"
+            }
+          },
+          "preSharedKey": {
+            "$ref": "#/components/schemas/PreSharedKey"
+          }
+        }
+      },
+      "AddGREConnection": {
+        "required": [
+          "externalIp"
+        ],
+        "type": "object",
+        "properties": {
+          "externalIp": {
+            "$ref": "#/components/schemas/IPv4Address"
+          }
+        }
+      },
+      "UpdateSiteInput": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "$ref": "#/components/schemas/SiteName"
+          },
+          "description": {
+            "$ref": "#/components/schemas/SiteDescription"
+          },
+          "address": {
+            "$ref": "#/components/schemas/Address"
+          },
+          "longitude": {
+            "$ref": "#/components/schemas/Longitude"
+          },
+          "latitude": {
+            "$ref": "#/components/schemas/Latitude"
+          },
+          "deviceType": {
+            "$ref": "#/components/schemas/DeviceType"
+          },
+          "subnets": {
+            "$ref": "#/components/schemas/Subnets"
+          },
+          "greConnection": {
+            "$ref": "#/components/schemas/UpdateGREConnection"
+          },
+          "ipsecConnection": {
+            "$ref": "#/components/schemas/UpdateIPSecConnection"
+          }
+        },
+        "additionalProperties": false
+      },
+      "UpdateIPSecConnection": {
+        "required": [
+          "isDynamicIp"
+        ],
+        "type": "object",
+        "properties": {
+          "isDynamicIp": {
+            "type": "boolean",
+            "description": "Set to `true` for using dynamic IP address, `false` for using static IP address."
+          },
+          "isMonitorWithDpd": {
+            "type": "boolean",
+            "description": "Set to `true` for tunnel monitoring using dpd (dead peer detection), `false` for monitoring by traffic."
+          },
+          "staticIpConnection": {
+            "$ref": "#/components/schemas/UpdateStaticIpConnection"
+          },
+          "dynamicIpConnection": {
+            "$ref": "#/components/schemas/UpdateDynamicIpConnection"
+          }
+        }
+      },
+      "UpdateStaticIpConnection": {
+        "required": [
+          "externalIps",
+          "preSharedKey"
+        ],
+        "type": "object",
+        "properties": {
+          "externalIps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IPv4Address"
+            }
+          },
+          "preSharedKey": {
+            "$ref": "#/components/schemas/PreSharedKey"
+          }
+        }
+      },
+      "UpdateDynamicIpConnection": {
+        "required": [
+          "interfaceIdentifiers",
+          "preSharedKey"
+        ],
+        "type": "object",
+        "properties": {
+          "interfaceIdentifiers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FQDN"
+            }
+          },
+          "preSharedKey": {
+            "$ref": "#/components/schemas/PreSharedKey"
+          }
+        }
+      },
+      "UpdateGREConnection": {
+        "required": [
+          "externalIp"
+        ],
+        "type": "object",
+        "properties": {
+          "externalIp": {
+            "$ref": "#/components/schemas/IPv4Address"
+          }
+        }
+      },
+      "ID": {
+        "type": "string",
+        "description": "Record unique ID",
+        "example": "11111111-1111-1111-1111-111111111111"
+      },
+      "SiteName": {
+        "type": "string",
+        "description": "Site Name",
+        "example": "Marketing Branch Office"
+      },
+      "SiteDescription": {
+        "type": "string",
+        "description": "Site description",
+        "example": "Branch Office in Northern California where marketing department resides."
+      },
+      "SiteType": {
+        "type": "string",
+        "description": "Site type:\n * `BRANCH_SITE` - A Branch office secured by Check Point",
+        "example": "BRANCH_SITE",
+        "enum": [
+          "BRANCH_SITE",
+          "VWAN_SITE"
+        ]
+      },
+      "SiteState": {
+        "type": "string",
+        "description": "A site can be at one of the following states:\n * `CREATING` - Site in creation process.\n * `DELETING` - Site is deletion process.\n * `UPDATING` - Site in update process.\n * `WAITING_FOR_TRAFFIC` - Site was created but no traffic was received yet.\n * `ACTIVE` - Site was created and traffic was recieved from the branch device.\n * `WARNING` - Traffic cannot pass through the site in some circumstances. Check field `events` for details.\n * `FAILURE` - Traffic cannot pass through the site. Check field `events` for details.",
+        "example": "ACTIVE",
+        "enum": [
+          "CREATING",
+          "DELETING",
+          "UPDATING",
+          "WAITING_FOR_TRAFFIC",
+          "WARNING",
+          "ACTIVE",
+          "FAILURE"
+        ]
+      },
+      "Address": {
+        "type": "string",
+        "description": "Street, city and country of a site's physical location. And address could also be simply the city, country and state, as it is only used to show your site on a world map at Infinity Portal. While address is an optional parameter, in case a site creation request lacks the location parameter, Check Point will use the location parameter provided either by longitude and latitude, or by the address, and will select the most fitting location automatically.",
+        "example": "1640 Riverside Drive, Hill Valley, California"
+      },
+      "Latitude": {
+        "type": "number",
+        "description": "Latitude of a site's physical location. While latitude is an optional parameter and is used to show your site on a world map at Infinity Portal, in case a site creation request lacks the location parameter, Check Point will use the location parameter provided by longitude and latitude, or by the address, and will select the most fitting location automatically.",
+        "example": 32.0696697
+      },
+      "Longitude": {
+        "type": "number",
+        "description": "Longitude of a site's physical location. While longitude is an optional parameter and is used to show your site on a world map at Infinity Portal, in case a site creation request lacks the location parameter, Check Point will use the location parameter provided by longitude and latitude, or by the address, and will select the most fitting location automatically.",
+        "example": 34.7955017
+      },
+      "DeviceType": {
+        "type": "string",
+        "description": "Device type:\n * `GENERIC-DEVICE` - Generic device\n * `CHECK-POINT-GATEWAY` - Check Point Gateway\n * `CHECK-POINT-SMB` - Check Point SMB gateway\n * `CISCO` - Cisco router\n * `CISCO-SD-WAN` - Cisco (Viptela) SD-WAN\n * `CISCO-MERAKI` - Cisco Meraki\n * `CITRIX` - Citrix SD-WAN\n * `SILVER-PEAK` - Silver Peak Unity EdgeConnect. For more on Check Point and Silver Peak, read the [Integration Guide](https://sc1.checkpoint.com/documents/integrations/SilverPeak/check-point-silver-peak-integration.html).\n * `VERSA` - Versa SD-WAN\n * `ARUBA-SD-BRANCH` - Aruba SD-Branch\n * `CLOUD-GENIX` - CloudGenix\n * `VMWARE-SD-WAN` - WMWare SD-WAN For more on Check Point and VMWare, read the [Integration Guide](https://sc1.checkpoint.com/documents/integrations/VeloCloud/check-point-VeloCloud-integration.html).\n * `ARYAKA` - Aryka SD-WAN\n * `NUAGE` - Nokia (Nuage) SD-WAN\n * `ORACLE` - Oracle (Talari) SD-WAN\n * `ASAVIE` - Asavie SD-WAN",
+        "example": "GENERIC-DEVICE",
+        "enum": [
+          "GENERIC-DEVICE",
+          "CHECK-POINT-GATEWAY",
+          "CHECK-POINT-SMB",
+          "CISCO",
+          "CISCO-SD-WAN",
+          "CISCO-MERAKI",
+          "CITRIX",
+          "SILVER-PEAK",
+          "VERSA",
+          "ARUBA-SD-BRANCH",
+          "CLOUD-GENIX",
+          "VMWARE-SD-WAN",
+          "ARYAKA",
+          "NUAGE",
+          "ORACLE",
+          "ASAVIE"
+        ]
+      },
+      "Subnets": {
+        "type": "array",
+        "description": "List of internal network addresses behind the branch device.",
+        "items": {
+          "$ref": "#/components/schemas/Subnet"
+        }
+      },
+      "Subnet": {
+        "type": "string",
+        "description": "Network address.",
+        "example": "12.32.4.0/24"
+      },
+      "TunnelType": {
+        "type": "string",
+        "description": "Tunnel type:\n * `IPSEC` - IPSec tunnel authenticated by pre-shared key\n * `GRE` - GRE tunnel",
+        "example": "IPSEC",
+        "enum": [
+          "IPSEC",
+          "GRE"
+        ]
+      },
+      "IPSecConnection": {
+        "type": "object",
+        "properties": {
+          "isDynamicIp": {
+            "type": "boolean",
+            "description": "Set to `true` for using dynamic IP address, `false` for using static IP address."
+          },
+          "isMonitorWithDpd": {
+            "type": "boolean",
+            "description": "Set to `true` for tunnel monitoring using dpd (dead peer detection), `false` for monitoring by traffic."
+          },
+          "staticIpConnection": {
+            "$ref": "#/components/schemas/StaticIpConnection"
+          },
+          "dynamicIpConnection": {
+            "$ref": "#/components/schemas/DynamicIpConnection"
+          }
+        }
+      },
+      "StaticIpConnection": {
+        "type": "object",
+        "properties": {
+          "externalIps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IPv4Address"
+            }
+          },
+          "preSharedKey": {
+            "$ref": "#/components/schemas/PreSharedKey"
+          }
+        }
+      },
+      "DynamicIpConnection": {
+        "type": "object",
+        "properties": {
+          "interfaceIdentifiers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FQDN"
+            }
+          },
+          "preSharedKey": {
+            "$ref": "#/components/schemas/PreSharedKey"
+          }
+        }
+      },
+      "GREConnection": {
+        "type": "object",
+        "properties": {
+          "externalIp": {
+            "$ref": "#/components/schemas/IPv4Address"
+          }
+        }
+      },
+      "IPSecTunnelParameters": {
+        "type": "object",
+        "properties": {
+          "internetKeyExchange": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InternetKeyExchange"
+            }
+          },
+          "phase1": {
+            "$ref": "#/components/schemas/IPSecPhase1Parameters"
+          },
+          "phase2": {
+            "$ref": "#/components/schemas/IPSecPhase2Parameters"
+          },
+          "tunnels": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IPSecTunnel"
+            }
+          }
+        },
+        "nullable": true
+      },
+      "InternetKeyExchange": {
+        "type": "string",
+        "description": "Internet key exchange:\n * `IKE-V1` - IKE V1\n * `IKE-V2` - IKE V2",
+        "example": "IKE-V1",
+        "enum": [
+          "IKE-V1",
+          "IKE-V2"
+        ]
+      },
+      "IPSecPhase1Parameters": {
+        "type": "object",
+        "properties": {
+          "encryption": {
+            "type": "string",
+            "enum": [
+              "AES-256"
+            ]
+          },
+          "dataIntegrity": {
+            "type": "string",
+            "enum": [
+              "SHA1"
+            ]
+          },
+          "diffieHellmanGroup": {
+            "type": "string",
+            "enum": [
+              "GROUP-2-1024-BIT"
+            ]
+          },
+          "renegotiateInterval": {
+            "type": "integer",
+            "description": "Interval (in seconds) between tunnel re-negotiation",
+            "example": 86400
+          }
+        }
+      },
+      "IPSecPhase2Parameters": {
+        "type": "object",
+        "properties": {
+          "encryption": {
+            "type": "string",
+            "enum": [
+              "AES-256"
+            ]
+          },
+          "dataIntegrity": {
+            "type": "string",
+            "enum": [
+              "SHA1"
+            ]
+          },
+          "renegotiateInterval": {
+            "type": "integer",
+            "description": "Interval (in seconds) between tunnel re-negotiation",
+            "example": 3600
+          }
+        }
+      },
+      "IPSecTunnel": {
+        "type": "object",
+        "properties": {
+          "destination": {
+            "$ref": "#/components/schemas/FQDN"
+          },
+          "testIp": {
+            "$ref": "#/components/schemas/IPv4Address"
+          }
+        }
+      },
+      "GRETunnelParameters": {
+        "type": "object",
+        "properties": {
+          "mss": {
+            "$ref": "#/components/schemas/TunnelMSS"
+          },
+          "mtu": {
+            "$ref": "#/components/schemas/TunnelMTU"
+          },
+          "tunnels": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GRETunnel"
+            }
+          }
+        },
+        "description": "GRE tunnel parameters",
+        "nullable": true
+      },
+      "TunnelMSS": {
+        "type": "integer",
+        "example": 1360
+      },
+      "TunnelMTU": {
+        "type": "integer",
+        "example": 1400
+      },
+      "GRETunnel": {
+        "type": "object",
+        "properties": {
+          "internalIp": {
+            "$ref": "#/components/schemas/IPv4Address"
+          },
+          "mask": {
+            "$ref": "#/components/schemas/NetMask"
+          },
+          "destinationIp": {
+            "$ref": "#/components/schemas/IPv4Address"
+          },
+          "routeIp": {
+            "$ref": "#/components/schemas/IPv4Address"
+          },
+          "pingIp": {
+            "$ref": "#/components/schemas/IPv4Address"
+          }
+        }
+      },
+      "FQDN": {
+        "type": "string",
+        "description": "Fully qualified domain name (FQDN) -  consisting of the hostname and the domain name.",
+        "example": "mydomain.hostname.com"
+      },
+      "LocationName": {
+        "type": "string",
+        "description": "The name of a location of Check Point's cloud service as pre-defined by Check Point.",
+        "example": "US: South East"
+      },
+      "IPv4Address": {
+        "type": "string",
+        "description": "IPv4 Address",
+        "example": "93.184.216.34"
+      },
+      "PreSharedKey": {
+        "type": "string",
+        "description": "Pre shared authentication key.\n\nMust follow the following constraints:\n\n<li> Must contain at least 6 chars.</li> <li> Must contain one capital letter. <li> Must contain one small letter.</li> <li> Must contain one number.</li> <li> Must contain at least 4 different characters.</li>",
+        "example": "asdfghjk123"
+      },
+      "NetMask": {
+        "type": "string",
+        "description": "Network mask",
+        "example": "255.255.255.0"
+      },
+      "PaginationResponseBase": {
+        "required": [
+          "limit",
+          "offset",
+          "total"
+        ],
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "example": 100
+          },
+          "offset": {
+            "type": "integer",
+            "example": 0
+          },
+          "total": {
+            "type": "integer",
+            "example": 300
+          }
+        }
+      },
+      "UnauthorizedErrorResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "enum": [
+              false
+            ]
+          },
+          "message": {
+            "type": "string",
+            "enum": [
+              "Authentication required"
+            ]
+          }
+        },
+        "description": "Invalid / missing authentication token was provided"
+      },
+      "ErrorsResponse": {
+        "type": "object",
+        "properties": {
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Error": {
+        "required": [
+          "message"
+        ],
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "Error message"
+          }
+        }
+      },
+      "inline_response_200": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          },
+          "data": {
+            "$ref": "#/components/schemas/inline_response_200_data"
+          }
+        }
+      },
+      "inline_response_200_1": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PaginationResponseBase"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Site"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "inline_response_201": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/Site"
+          }
+        }
+      },
+      "inline_response_200_2": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Location"
+            }
+          }
+        }
+      },
+      "inline_response_200_3": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/Location"
+          }
+        }
+      },
+      "inline_response_200_data": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "$ref": "#/components/schemas/AuthToken"
+          }
+        }
+      }
+    },
+    "responses": {
+      "GetAuthTokenResponse": {
+        "description": "Successful operation",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/inline_response_200"
+            }
+          }
+        }
+      },
+      "GetSitesResponse": {
+        "description": "Successful operation",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/inline_response_200_1"
+            }
+          }
+        }
+      },
+      "GetSiteByIdResponse": {
+        "description": "Successful operation",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/inline_response_201"
+            }
+          }
+        }
+      },
+      "AddSiteResponse": {
+        "description": "Site added successfully",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/inline_response_201"
+            }
+          }
+        }
+      },
+      "GetLocationsResponse": {
+        "description": "Successful operation",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/inline_response_200_2"
+            }
+          }
+        }
+      },
+      "UpdateSiteResponse": {
+        "description": "Site updated successfully",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/inline_response_201"
+            }
+          }
+        }
+      },
+      "GetLocationByIdResponse": {
+        "description": "Successful operation",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/inline_response_200_3"
+            }
+          }
+        }
+      },
+      "UnauthorizedError": {
+        "description": "Access token is missing or invalid",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/UnauthorizedErrorResponse"
+            }
+          }
+        }
+      },
+      "ForbiddenError": {
+        "description": "Operation is forbidden",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorsResponse"
+            }
+          }
+        }
+      },
+      "BadRequest": {
+        "description": "Bad request",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorsResponse"
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "Not found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorsResponse"
+            }
+          }
+        }
+      },
+      "InternalError": {
+        "description": "Internal Server Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorsResponse"
+            }
+          }
+        }
+      }
+    },
+    "parameters": {
+      "QueryOffset": {
+        "name": "offset",
+        "in": "query",
+        "description": "objects from offset (must be used with 'limit' parameter)",
+        "required": false,
+        "style": "form",
+        "explode": true,
+        "schema": {
+          "maximum": 1000000,
+          "minimum": 0,
+          "type": "integer",
+          "default": 0
+        }
+      },
+      "QueryLimit": {
+        "name": "limit",
+        "in": "query",
+        "description": "objects to (must be used with 'offset' parameter)",
+        "required": false,
+        "style": "form",
+        "explode": true,
+        "schema": {
+          "maximum": 100,
+          "minimum": 0,
+          "type": "integer",
+          "default": 20
+        }
+      },
+      "SiteId": {
+        "name": "siteId",
+        "in": "path",
+        "description": "ID of a site. For the list of all sites and their ID's, see the API for /sites",
+        "required": true,
+        "style": "simple",
+        "explode": false,
+        "schema": {
+          "$ref": "#/components/schemas/ID"
+        }
+      },
+      "LocationId": {
+        "name": "locationId",
+        "in": "path",
+        "description": "ID of a location of Check Point's cloud service as pre-defined by Check Point.",
+        "required": true,
+        "style": "simple",
+        "explode": false,
+        "schema": {
+          "$ref": "#/components/schemas/ID"
+        }
+      }
+    },
+    "requestBodies": {
+      "GetAuthToken": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/GetAuthTokenInput"
+            }
+          }
+        },
+        "required": true
+      },
+      "AddSite": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/AddSiteInput"
+            }
+          }
+        },
+        "required": true
+      },
+      "UpdateSite": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/UpdateSiteInput"
+            }
+          }
+        },
+        "required": true
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}
